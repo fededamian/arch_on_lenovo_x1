@@ -636,6 +636,7 @@ paru google-chrome
 
 ## Notes
 
+Window Manager: DWM or BSPWM or Awesome or Hyprland that uses Wayland
 Status Bar - polybar
 Launcher: DMenu or Rofi
 zsh
