@@ -1,5 +1,7 @@
 # Arch Linux Installation on Lenovo Gen 12 ThinkPad X1 Carbon
 
+![](img/title.png)
+
 The following steps explain how to install Arch Linux in a brand new computer without deleting the Windows installation or the recovery partitions. The specifications and installation decisions chosen for the installation are listed down below.
 
 ## Computer Specs
@@ -583,7 +585,7 @@ List available tools if you want running:
 pacman -Sgg | grep blackarch
 ```
 
-## Install the GUI
+## Install the Desktop Environment 
 
 Reference: https://wiki.archlinux.org/title/Awesome#Installation
 
@@ -631,6 +633,22 @@ reboot
 pacman -Sy firefox
 paru google-chrome
 ```
+
+## Notes
+
+Status Bar - polybar
+Launcher: DMenu or Rofi
+zsh
+    - powerlevel10k
+    - zsh-sudo plugin
+Nvim
+Nvimchad
+Terminal Tools:
+    - fzf
+    - bat
+    - lsd
+    - btop
+
 
 ## References:
 
