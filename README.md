@@ -1,6 +1,5 @@
 # Arch Linux Installation on Lenovo Gen 12 ThinkPad X1 Carbon
 
-![](img/title.png)
 
 The following steps explain how to install Arch Linux in a brand new computer without deleting the Windows installation or the recovery partitions. The specifications and installation decisions chosen for the installation are listed down below.
 
