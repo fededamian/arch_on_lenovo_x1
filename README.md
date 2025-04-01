@@ -298,7 +298,7 @@ Run the `pacstrap` command that bootstraps Arch into the created filesystem. Bel
 - The rest are useful known utilities.
 
 ```
-pacstrap /mnt base base-devel linux linux-firmware intel-ucode btrfs-progs networkmanager cryptsetup lvm2 vim neovim git man-db
+pacstrap /mnt base base-devel linux linux-firmware intel-ucode btrfs-progs networkmanager cryptsetup lvm2 vim neovim git man-db man-pages
 ```
 
 This command will take some time.
@@ -398,7 +398,13 @@ passwd lowpriv
 usermod -aG wheel lowpriv
 ```
 
-- Install `sudo` to be able to elevate privileges to root with the low-privilege account.
+- Test the user by running `su lowpriv` and within that session create standard directories:
+
+```
+mkdir {Desktop,Downloads,Documents,Pictures}
+```
+
+- Run `exit` to go back to the `root` session and install `sudo` to be able to elevate privileges to root with the low-privilege account.
 
 ```
 pacman -S sudo
@@ -446,6 +452,24 @@ blkid | grep nvme0n1p5
 "Boot with standard options"  "cryptdevice=UUID=uuid-of-luks-partition:cryptroot:allow-discards rw quiet root=/dev/mapper/cryptroot rootflags=subvol=@"
 ```
 
+- Edit the `/boot/EFI/refind/refind.conf` file to make the Arch Linux configuration as follows:
+
+```
+menuentry "Arch Linux" {
+    icon    /EFI/refind/icons/os_arch.png
+    volume  "Arch Linux"
+    loader  /vmlinuz-linux
+    initrd  /initramfs-linux.img
+    options "cryptdevice=UUID=uuid-of-luks-partition:cryptroot:allow-discards rw quiet root=/dev/mapper/cryptroot rootflags=subvol=@"
+    submenuentry    "Boot using fallback initramfs" {
+        inird /initramfs-linux-fallback.img
+    }
+    submenuentry "Boot to terminal" {
+        add_options "systemd.unit=multi-user.target"
+    }
+}
+```
+
 - Install the rEFInd theme of your preference. I will use `ursamajor-rEFInd`.
 
 ```
@@ -455,12 +479,17 @@ cd themes
 git clone https://github.com/kgoettler/ursamajor-rEFInd.git
 ```
 
-Add the following line to the bottom of the refind.conf file in the rEFInd directory:
+Add the following line to the bottom of the `/boot/EFI/refind/refind.conf` file:
 
 ```
 include themes/ursamajor-rEFInd/theme.conf
 ```
 
+There will be 3 icons:
+
+- Windows icon for Windows.
+- Tux icon for the Arch configuration through `refind_linux.conf`, which uses the EFI stub loader.
+- Arch icon, which uses what is called "the stanza", which is the menuentry in the `refind.conf` file.
 
 ## Configure mkinitcpio to use subvolumes and LUKS
 
@@ -496,9 +525,116 @@ Exit the chroot environment using the `exit` command, and then use the `reboot` 
 
 ## Configure the swapfile
 
+Reference: https://wiki.archlinux.org/title/Btrfs#Swap_file
+
+Make sure the `lsblk` command shows the `/swap` mounted within `cryptroot`.
+
+- As `root`, run the following to create the swap file: 
+
+```
+btrfs filesystem mkswapfile --size 4g --uuid clear /swap/swapfile
+```
+
+- Activate the swap:
+
+```
+swapon /swap/swapfile
+```
+
+- Edit the `/etc/fstab` file to include the swapfile by adding the following line:
+
+```
+# /swap/swapfile
+/swap/swapfile  none    swap    defaults    0   0
+```
+
+## Fix Watchdog Error
+
+When rebooting there is a watchdog error. To fix it open `/etc/systemd/system.conf` and uncomment and edit the line to look like this:
+
+```
+RebootWatchdogSec=0
+```
+
+## Enable AUR to get access to more packages
+
+```
+mkdir -p $HOME/repos
+git clone https://aur.archlinux.org/paru-bin.git
+makepkg -si
+```
+## Install the black arch repositories
+
+This is to be able to use hacking tools from the black arch linux repository.
+
+```
+cd $HOME/Downloads
+curl -O https://blackarch.org/strap.sh
+chmod +x ./strap.sh
+sudo su
+./strap.sh
+```
+
+Now running `pacman -Sy` should show `blackarch` as one repository available.
+
+List available tools if you want running:
+
+```
+pacman -Sgg | grep blackarch
+```
+
+## Install the GUI
+
+Reference: https://wiki.archlinux.org/title/Awesome#Installation
+
+We will use the AwesomeWM, which is a tiling window manager which is installed on top of GNOME.
+
+- Install the required packages for GNOME:
+
+```
+pacman -S xorg xorg-server gnome
+```
+
+- Start and Enable (start on boot) the systemd service:
+
+```
+systemctl enable gdm.service
+systemctl start gdm.service
+```
+
+Try logging in with the lowpriv user to check it works.
+
+- To enable autologin (I use this due to the LUKS partition initial barrier) edit the `/etc/gdm/custom.conf` file and make sure that the [daemon] section in the file specifies the following:
+
+```
+[daemon]
+AutomaticLoginEnable=True
+AutomaticLogin=lowpriv
+```
+
+- In GNOME, configure the keyboard by pressing Super, writing "_Keyboard_", and choosing as Input Source "_English (US, intl., with dead keys)_"
+
+## Fix Audio
+
+The audio wasn't working by default, there are two packages required, and `alsa-utils` is also added in case debugging is needed. Then reboot.
+
+```
+pacman -Sy sof-firmware alsa-ucm-conf alsa-utils
+reboot
+```
+
+## Install Web Browsers
+
+- Install firefox and google chrome:
+
+```
+pacman -Sy firefox
+paru google-chrome
+```
 
 ## References:
 
 - [Luke Smith Artix / Arch Installation](https://www.youtube.com/watch?app=desktop&v=dI3bGeT31Bo&t=2412s)
 - [Rob Fisher Framework Computer Arch Installation](https://www.youtube.com/watch?v=BAQ78pBPjjc&list=WL&index=4)
 - [Savitar Arch Installation](https://www.youtube.com/watch?v=fshLf6u8B-w)
+- [Refind Icons](https://bbs.archlinux.org/viewtopic.php?id=264218)
