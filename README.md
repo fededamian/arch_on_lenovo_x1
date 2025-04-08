@@ -12,14 +12,18 @@ The following steps explain how to install Arch Linux in a brand new computer wi
 - **Drive**: 1TB Gen4 Performance SSD
 - **Base OS**: Win 11 Pro
 
-## Installation Decisions
+## Overal System Installation Decisions
 
 - Dual boot Arch and Windows.
 - Will NOT support Fast Startup or Hibernate (Suspend to Disk).
 - Will configure Windows Encryption with Bitlocker.
-- Will use an unencrypted boot partition.
-- Will use an encrypted LUKS partition with a BTRFS filesystem within it, with an encrypted subvolume for the Swap partition and an encrypted subvolume for the root partition. I won't create a subvolume for /home since most of my data is stored in a private NAS.
-- Will use the refind boot manager.
+- Will use an unencrypted boot partition for EFI / GPT.
+- Will use an encrypted LUKS partition with a BTRFS filesystem within it, with an encrypted subvolume for the Swap partition and an encrypted subvolume for the root partition. I won't create a subvolume for /home since most of my data is stored in a private NAS. Another common option is ext4 but btrfs has support for subvolumes, snapshots and other features.
+- Will use the refind boot manager. Other options could be GRUB or LILO.
+
+## Arch Installation Decisions
+
+
 
 ## Free up Space for the new OS in Windows
 
@@ -625,6 +629,14 @@ pacman -Sy sof-firmware alsa-ucm-conf alsa-utils
 reboot
 ```
 
+## Install Video Drivers
+
+This laptop comes with intel graphics. We install the latest drivers through `mesa`
+
+```
+pacman -S mesa lib32-mesa
+```
+
 ## Install Web Browsers
 
 - Install firefox and google chrome:
@@ -636,19 +648,56 @@ paru google-chrome
 
 ## Notes
 
+For BSPWM check https://github.com/baskerville/bspwm/issues/631 for DPI
+Reference for BSPWM https://www.youtube.com/watch?v=XTcf8g54RuU
+
 Window Manager: DWM or BSPWM or Awesome or Hyprland that uses Wayland
 Status Bar - polybar
 Launcher: DMenu or Rofi
 zsh
     - powerlevel10k
     - zsh-sudo plugin
+VSCode
 Nvim
 Nvimchad
-Terminal Tools:
+Terminal Tools: Kitty
     - fzf
     - bat
     - lsd
     - btop
+
+Status Bars
+
+App Launchers
+
+Wallpapers
+
+Screen Sharing
+
+lf, btop, pulsemixer, cider2 for apple music
+
+Set wallpaper with feh https://wiki.archlinux.org/title/Feh
+
+LARBS - https://larbs.xyz/
+
+App Clients
+
+Color Pickers
+
+Clipboard Managers
+
+Key Bindings
+
+File Managers: Ranger
+
+Music Player: RMPC + MPD + Cava
+
+Other
+
+Systemd startup
+
+https://github.com/reedrw/dotfiles/tree/master
+
 
 
 ## References:
