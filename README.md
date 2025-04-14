@@ -719,7 +719,7 @@ References:
 - https://wiki.archlinux.org/title/HiDPI
 - https://github.com/gh0stzk/dotfiles/issues/392
 
-Since the screen in this computer has a HiDPI with a resolution of `XXXX x 1800` pixels everything looks small by default and different configurations have to be made to make it look correctly. We will use a value of DPI of `192`.
+Since the screen in this computer has a HiDPI with a resolution of `2880 x 1800` pixels everything looks small by default and different configurations have to be made to make it look correctly. We will use a value of DPI of `192`.
 
 - Definition in Xresources
 
