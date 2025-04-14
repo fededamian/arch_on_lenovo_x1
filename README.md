@@ -719,20 +719,24 @@ References:
 - https://wiki.archlinux.org/title/HiDPI
 - https://github.com/gh0stzk/dotfiles/issues/392
 
-Since the screen in this computer has a HiDPI with a resolution of `2880 x 1800` pixels everything looks small by default and different configurations have to be made to make it look correctly. We will use a value of DPI of `192`.
+Since the screen in this computer has a HiDPI with a resolution of `2880 x 1800` pixels everything looks small by default and different configurations have to be made to make it look correctly. We will use a value of DPI of `242`.
 
 - Definition in Xresources
 
 ```
-echo "Xft.dpi: 192" >> $HOME/.Xresources
+echo "Xft.dpi: 242" >> $HOME/.Xresources
 ```
 
-- Definition for Polybar:
+- Definitions for Polybar:
 
 ./rices/marisol/config.ini
+Specify height 30 and the fonts how they are
+
+
+
 
 - remove polybar offsets
-- assign dpi to 192 in polybar xresoureces
+- assign dpi to 242 in polybar xresoureces
 - Fix Rofi Size by editing ~/.config/bspwm/src/config/RofiLauncher and adding `-dpi 192` to the commands using rofi and by editing the styling file at ~/.config/bspwm/src/rofi-themes/style_1.rasi and increasing the width to 1200 
 - Change font size to 11 in rice editor.i
 - Change app launchers to google-chrome-stable --new-window --app=https://www.youtube.com
