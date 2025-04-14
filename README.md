@@ -1,4 +1,6 @@
-# Arch Linux Installation on Lenovo Gen 12 ThinkPad X1 Carbon
+# Arch Linux Installation 
+
+### Lenovo ThinkPad X1 Carbon Gen 12 
 
 ![](img/title.png)
 
@@ -15,15 +17,16 @@ The following steps explain how to install Arch Linux in a brand new computer wi
 ## Overal System Installation Decisions
 
 - Dual boot Arch and Windows.
-- Will NOT support Fast Startup or Hibernate (Suspend to Disk).
+- Will **NOT** support Fast Startup or Hibernate (Suspend to Disk).
 - Will configure Windows Encryption with Bitlocker.
 - Will use an unencrypted boot partition for EFI / GPT.
-- Will use an encrypted LUKS partition with a BTRFS filesystem within it, with an encrypted subvolume for the Swap partition and an encrypted subvolume for the root partition. I won't create a subvolume for /home since most of my data is stored in a private NAS. Another common option is ext4 but btrfs has support for subvolumes, snapshots and other features.
-- Will use the refind boot manager. Other options could be GRUB or LILO.
-
-## Arch Installation Decisions
-
-
+- Will use an encrypted LUKS partition with a BTRFS filesystem within it with:
+  - An encrypted subvolume for the Swap partition
+  - An encrypted subvolume for the root partition.
+- I won't create a subvolume for /home since most of my data is stored in a private NAS. Another common option is ext4 but BTRFS Has support for subvolumes, snapshots and other features.
+- Will use the [rEFInd](https://www.rodsbooks.com/refind/) boot manager. Other options could be GRUB or LILO.
+- Will use the Desktop Environment from the [gh0stzk dotfiles](https://github.com/gh0stzk/dotfiles).
+- The dotfiles are based on bspwm, sxhkd, polybar, rofi, eww, alacritty, kitty, and other tools.
 
 ## Free up Space for the new OS in Windows
 
@@ -40,7 +43,6 @@ Reference: https://wiki.archlinux.org/title/Dual_boot_with_Windows
 
 Fast Startup comes by default in Windows 11 and means the shut-down behavior is not shutting down but instead hibernate. Hibernation can corrupt the data if the NTFS disk is mounted from linux while windows was hibernated so the safest choice is to disable it.
 
-- In Windows, open an Administrator cmd shell by using the Super key, typing `cmd`, right-clicking it and choosing "_Run as Administrator_".
 - Type:
 ```
 powercfg /H off
@@ -219,7 +221,7 @@ mkfs.btrfs /dev/mapper/cryptroot
 mount /dev/mapper/cryptroot /mnt
 ```
 
-## Create Subvolumes for / and swapfile in the BTRFS filesystem and mount them
+## Create Subvolumes for / and swapfile in BTRFS 
 
 - Create the root subvolume.
 
@@ -232,6 +234,8 @@ btrfs subvolume create /mnt/@
 ```
 btrfs subvolume create /mnt/@swap
 ```
+
+## Unmount the Filesystem and mount the Subvolumes
 
 - Unmount the BTRFS filesystem.
 
@@ -374,7 +378,7 @@ KEYMAP=us-acentos
 
 #### Configure the Name of the computer
 
-We will give the name `x1` to this computer.
+We will give the name `x1` to this computer with the following command:
 
 ```
 echo "x1" > /etc/hostname
@@ -407,7 +411,7 @@ usermod -aG wheel lowpriv
 - Test the user by running `su lowpriv` and within that session create standard directories:
 
 ```
-mkdir {Desktop,Downloads,Documents,Pictures}
+mkdir {Desktop,Downloads,Documents,Pictures,Music}
 ```
 
 - Run `exit` to go back to the `root` session and install `sudo` to be able to elevate privileges to root with the low-privilege account.
@@ -424,20 +428,22 @@ pacman -S sudo
 
 #### Configure the NetworkManager
 
-- To use the network and connect automatically to the wifi once the system boots up we use the following commands:
+- To use the network and connect automatically to the wifi once the system boots up we use the following commands replacing SSID_or_BSSID and PASSWORD:
 
 ```
 systemctl start NetworkManager.service
 systemctl enable NetworkManager.service
-nmcli device wifi connect SSID_or_BSSID password password
+nmcli device wifi connect SSID_or_BSSID password PASSWORD 
 ```
 
 ## Boot Manager Installation and Configuration
 
+The boot manager is the component first loaded into the CPU after the BIOS/EFI. The most common one is GRUB but I will use rEFInd because I liked how it can be themed and has all the features required like decrypting partitions and support for BTRFS.
+
 - Install rEFInd into the system.
 
 ```
-pacman -S refind
+pacman -Sy refind
 ```
 
 - Use rEFInd install script to configure it as the boot manager.
@@ -497,9 +503,9 @@ There will be 3 icons:
 - Tux icon for the Arch configuration through `refind_linux.conf`, which uses the EFI stub loader.
 - Arch icon, which uses what is called "the stanza", which is the menuentry in the `refind.conf` file.
 
-## Configure mkinitcpio to use subvolumes and LUKS
+## Configure `mkinitcpio` to use Subvolumes and LUKS
 
-This configuration allows the system to start with the modules required to decrypt the system and mount the btrfs subvolumes.
+This configuration allows the system to start with the modules required to decrypt the system and mount the BTRFS subvolumes.
 
 - Edit `/etc/mkinitcpio.conf`. Look for the line that says `MODULES`. Add `btrfs` in it. Example:
 
@@ -518,7 +524,7 @@ HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont bl
 mkinitcpio -p linux
 ```
 
-## Boot into the New Arch Operating System installed in the Hard Drive
+## Boot into the New Arch Linux from the Hard Drive
 
 After all the configurations done, the system should be ready to boot.
 
@@ -541,7 +547,7 @@ Make sure the `lsblk` command shows the `/swap` mounted within `cryptroot`.
 btrfs filesystem mkswapfile --size 4g --uuid clear /swap/swapfile
 ```
 
-- Activate the swap:
+- Activate the swap, with the following command, which makes the enablement persistent on the system:
 
 ```
 swapon /swap/swapfile
@@ -564,12 +570,21 @@ RebootWatchdogSec=0
 
 ## Enable AUR to get access to more packages
 
+- Reference: https://wiki.archlinux.org/title/Arch_User_Repository
+
+The Arch User Repository (AUR) is a community-driven repository for Arch Linux users. It contains package descriptions (PKGBUILDs) that allow you to compile a package from source with makepkg and then install it via pacman.
+
+There are two main tools to use AUR, one is `paru` and the other one is `yay`. We'll use paru:
+
+- Create a directory for repositories, clone paru and install it.
+
 ```
 mkdir -p $HOME/repos
 git clone https://aur.archlinux.org/paru-bin.git
 makepkg -si
 ```
-## Install the black arch repositories
+
+## Install the Black Arch Repositories
 
 This is to be able to use hacking tools from the black arch linux repository.
 
@@ -581,7 +596,7 @@ sudo su
 ./strap.sh
 ```
 
-Now running `pacman -Sy` should show `blackarch` as one repository available.
+Now running `pacman -Sy` should show `blackarch` as on avaliable repository.
 
 List available tools if you want running:
 
@@ -591,9 +606,9 @@ pacman -Sgg | grep blackarch
 
 ## Install the Desktop Environment 
 
-Reference: https://wiki.archlinux.org/title/Awesome#Installation
+### Install and Configure GNOME
 
-We will use the AwesomeWM, which is a tiling window manager which is installed on top of GNOME.
+Although I will not use GNOME as the main DE, it is useful to have it available just in case, together with the tools it includes, and it will also install GDM which is the manager to choose the session (gnome or bspwm). This is not mandatory as other managers can be used but I like to have GNOME just in case.
 
 - Install the required packages for GNOME:
 
@@ -601,7 +616,7 @@ We will use the AwesomeWM, which is a tiling window manager which is installed o
 pacman -S xorg xorg-server gnome
 ```
 
-- Start and Enable (start on boot) the systemd service:
+- Start and Enable (start on boot) the GDM systemd service:
 
 ```
 systemctl enable gdm.service
@@ -610,7 +625,7 @@ systemctl start gdm.service
 
 Try logging in with the lowpriv user to check it works.
 
-- To enable autologin (I use this due to the LUKS partition initial barrier) edit the `/etc/gdm/custom.conf` file and make sure that the [daemon] section in the file specifies the following:
+- To enable autologin edit the `/etc/gdm/custom.conf` file and make sure that the [daemon] section in the file specifies the following:
 
 ```
 [daemon]
@@ -618,23 +633,37 @@ AutomaticLoginEnable=True
 AutomaticLogin=lowpriv
 ```
 
+I use this since it is required the LUKS partition password to unlock the computer and I don't want to type another password right after that. Once the computer and OS are on the laptop can be locked.
+
 - In GNOME, configure the keyboard by pressing Super, writing "_Keyboard_", and choosing as Input Source "_English (US, intl., with dead keys)_"
 
-## Fix Audio
+## Setup Bluetooth
 
-The audio wasn't working by default, there are two packages required, and `alsa-utils` is also added in case debugging is needed. Then reboot.
+The following packages are required.
+
+- Install required packages:
+
+```
+sudo pacman -S bluez bluez-utils
+systemctl start bluetooth.service
+systemctl enable bluetooth.service
+```
+
+## Setup Video 
+
+This laptop comes with Intel graphics. We install the latest drivers through `mesa`
+
+```
+pacman -S mesa lib32-mesa
+```
+
+## Setup Audio
+
+The following two packages required, and `alsa-utils` is also added in case debugging is needed. Then reboot.
 
 ```
 pacman -Sy sof-firmware alsa-ucm-conf alsa-utils
 reboot
-```
-
-## Install Video Drivers
-
-This laptop comes with intel graphics. We install the latest drivers through `mesa`
-
-```
-pacman -S mesa lib32-mesa
 ```
 
 ## Install Web Browsers
@@ -646,10 +675,189 @@ pacman -Sy firefox
 paru google-chrome
 ```
 
+## Install the Tiling Windows Desktop Environmen
+
+There are different tiling window managers, the most used ones as of today are bswpm, dwm and awesome (i3 is a popular one but now considered old). I will use bspwm, which requires some other tools to make it functional. Instead of installing everything from scratch, I am using a project whose default installation covers a lot of the needs and I will customize it afterwards.
+
+**Project**: https://github.com/gh0stzk/dotfiles
+
+- Create a folder inside the `repos` folder:
+
+```
+ mkdir -p $HOME/repos/gh0stzk; cd $HOME/repos/gh0stzk
+```
+
+- Download the installer:
+
+```
+curl -LO http://gh0stzk.github.io/dotfiles/RiceInstaller
+```
+
+- Give it execution permission
+
+```
+chmod +x RiceInstaller
+```
+
+- Run the installer
+
+```
+./RiceInstaller
+```
+
+## Gh0stzk Window Manager Customization
+
+The following changes have to be applied after the installation:
+
+### Choose the `emila` theme.
+
+Use `Alt + Space` to choose the `emilia` theme.
+
+### Configurations for HiDPI
+
+References:
+- https://wiki.archlinux.org/title/HiDPI
+- https://github.com/gh0stzk/dotfiles/issues/392
+
+Since the screen in this computer has a HiDPI with a resolution of `XXXX x 1800` pixels everything looks small by default and different configurations have to be made to make it look correctly. We will use a value of DPI of `192`.
+
+- Definition in Xresources
+
+```
+echo "Xft.dpi: 192" >> $HOME/.Xresources
+```
+
+- Definition for Polybar:
+
+./rices/marisol/config.ini
+
+- remove polybar offsets
+- assign dpi to 192 in polybar xresoureces
+- Fix Rofi Size by editing ~/.config/bspwm/src/config/RofiLauncher and adding `-dpi 192` to the commands using rofi and by editing the styling file at ~/.config/bspwm/src/rofi-themes/style_1.rasi and increasing the width to 1200 
+- Change font size to 11 in rice editor.i
+- Change app launchers to google-chrome-stable --new-window --app=https://www.youtube.com
+- Add 10 workspaces in ~/.config/bspwm/src/MonitorSetup
+- Change the font of JGmenu to 30 pt at ~/config/bspwm/src/config/jgmenurc
+- Disable the ascii art that appears when opening a terminal?
+Open the .zshrc file located in your HOME and delete the last line, which would be this $HOME/.local/bin/colorscript -r
+- Remove the firefox them:e
+
+Delete the "Chrome" directory and the file "user.js" located at ~/.mozilla/firefox/####.default-release/
+Where #### are random numbers. Restart firefox and you are done.
+- Remove the -a from the ls alias in .zshrc
+- Remove drawings from the terminal when opening it
+- REmove animations
+- Replace key bindings to larbs
+
+## Install Burp Suite
+
+- Install first the JDK and then burp:
+
+```
+pacman -S jdk-openjdk && pacman -S burpsuite
+```
+
+- Run Burp with the following command to fix DPI issues:
+```
+java -Dsun.java2d.dpiaware=true -Dsun.java2d.uiScale=2.0 -jar /usr/share/burpsuite/burpsuite.jar
+```
+
+
+
+- Install BSPWM dependencies
+
+```
+pacman -S libxcb xcb-util xcb-util-wm xcb-util-keysyms
+```
+
+- Install the tools that are going to be used:
+
+```
+pacman -Su bspwm sxhkd polybar picom rofi dunst zathura cava
+```
+
+##### Create the config directory and files
+
+```
+mkdir -p $HOME/.config/{bspwm,sxhkd,polybar,picom,rofi,dunst}
+cp /usr/share/doc/bspwm/examples/bspwmrc $HOME/.config/bspwm/
+cp /usr/share/doc/bspwm/examples/sxhkdrc $HOME/.config/sxhkd/
+cp /etc/xdg/picom.conf $HOME/.config/picom/
+cp /etc/polybar/config.ini $HOME/.config/polybar/
+cp /etc/dunst/dunstrc $HOME/.config/dunst/
+chmod +x $HOME/.config/bspwm/bspwmrc
+```
+
+##### Fixing polybar wrong name
+
+The sample config for the polybar has the name `bar/example`, it has to be changed to `bar/top` to be the default one.
+
+##### Configure HiDPI
+
+- Create the $HOME/.Xresources file and include the following line:
+
+```
+Xft.dpi: 168
+```
+
+- For polybar, edit the configuration file at `$HOME/.config/polybar/config.ini` to uncomment and set:
+
+```
+dpi = 168
+```
+
+## Configure keymap for Xorg
+
+- Create the `/etc/X11/xorg.conf.d/00-keyboard.conf` file and include the following:
+
+```
+Section "InputClass"
+        Identifier "system-keyboard"
+        MatchIsKeyboard "on"
+        Option "XkbLayout" "us"
+        Option "XkbVariant" "intl"
+EndSection
+```
+
+## Change screen brightness
+
+Reference: https://wiki.archlinux.org/title/Backlight
+
+- Check what the max brightness is:
+
+```
+sudo cat /sys/class/backlight/intel_backlight/max_brightness
+```
+
+- Configure the brightness to a certain level (e.g. `300`)
+
+```
+sudo echo 300 > /sys/class/backlight/intel_backlight/brightness
+```
+
+## Download and Install Hack Nerd Fonts
+
+```
+curl -Ls https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Hack.zip -o Hack.zip
+sudo unzip Hack.zip -d /usr/share/fonts/
+sudo rm /usr/share/fonts/{LICENSE,README}.md
+```
+
+## Install ZSH
+
+```
+sudo pacman -S zsh
+sudo usermod --shell /usr/bin/zsh lowpriv
+```
+
+## Install bat
+
+```
+sudo pacman -Syu bat
+```
+
 ## Notes
 
-For BSPWM check https://github.com/baskerville/bspwm/issues/631 for DPI
-Reference for BSPWM https://www.youtube.com/watch?v=XTcf8g54RuU
 
 Window Manager: DWM or BSPWM or Awesome or Hyprland that uses Wayland
 Status Bar - polybar
@@ -665,7 +873,7 @@ Terminal Tools: Kitty
     - bat
     - lsd
     - btop
-
+- wget
 Status Bars
 
 App Launchers
@@ -697,7 +905,6 @@ Other
 Systemd startup
 
 https://github.com/reedrw/dotfiles/tree/master
-
 
 
 ## References:
