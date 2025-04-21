@@ -730,6 +730,7 @@ echo "Xft.dpi: 192" >> $HOME/.Xresources
 echo "rofi.dpi: 192">> $HOME/.Xresources
 ```
 
+- Configure resizing like https://github.com/ghomasHudson/bspwm-dwm/
 - Definitions for Polybar:
 
 ./rices/marisol/config.ini
