@@ -308,7 +308,7 @@ Run the `pacstrap` command that bootstraps Arch into the created filesystem. Bel
 - The rest are useful known utilities.
 
 ```
-pacstrap /mnt base base-devel linux linux-firmware intel-ucode btrfs-progs networkmanager cryptsetup lvm2 vim neovim git man-db man-pages
+pacstrap /mnt base base-devel linux linux-firmware intel-ucode btrfs-progs networkmanager cryptsetup lvm2 vim neovim git man-db man-pages openbsd-netcat
 ```
 
 This command will take some time.
@@ -718,13 +718,16 @@ Use `Alt + Space` to choose the `emilia` theme.
 References:
 - https://wiki.archlinux.org/title/HiDPI
 - https://github.com/gh0stzk/dotfiles/issues/392
+- https://askubuntu.com/questions/197828/how-to-find-and-change-the-screen-dpi
+- https://unix.stackexchange.com/questions/75344/how-does-x-server-calculate-dpi
 
-Since the screen in this computer has a HiDPI with a resolution of `2880 x 1800` pixels everything looks small by default and different configurations have to be made to make it look correctly. We will use a value of DPI of `242`.
+Since the screen in this computer has a HiDPI with a resolution of `2880 x 1800` pixels everything looks small by default and different configurations have to be made to make it look correctly. We will use a value of DPI of `192`.
 
 - Definition in Xresources
 
 ```
-echo "Xft.dpi: 242" >> $HOME/.Xresources
+echo "Xft.dpi: 192" >> $HOME/.Xresources
+echo "rofi.dpi: 192">> $HOME/.Xresources
 ```
 
 - Definitions for Polybar:
@@ -732,11 +735,14 @@ echo "Xft.dpi: 242" >> $HOME/.Xresources
 ./rices/marisol/config.ini
 Specify height 30 and the fonts how they are
 
-
-
-
+- Change in ExternalRules the size of the Floating and Updating classes since its too small
+- change weather location in ~/.config/bspwm/src/Weather
+- REmove ctrl tab from sxhdrc
+- Actually serch for all the rofi usages and add the -dpi 192 command
+- Alt Tab Rofi requires the dpi parameter in sxhkdrc/
+- Fix DPI in the RiceSelector script, which uses ROFI, the same thing as RofiLauncher that comes later
 - remove polybar offsets
-- assign dpi to 242 in polybar xresoureces
+- assign dpi to 192 in polybar xresoureces
 - Fix Rofi Size by editing ~/.config/bspwm/src/config/RofiLauncher and adding `-dpi 192` to the commands using rofi and by editing the styling file at ~/.config/bspwm/src/rofi-themes/style_1.rasi and increasing the width to 1200 
 - Change font size to 11 in rice editor.i
 - Change app launchers to google-chrome-stable --new-window --app=https://www.youtube.com
@@ -779,22 +785,6 @@ pacman -S libxcb xcb-util xcb-util-wm xcb-util-keysyms
 ```
 pacman -Su bspwm sxhkd polybar picom rofi dunst zathura cava
 ```
-
-##### Create the config directory and files
-
-```
-mkdir -p $HOME/.config/{bspwm,sxhkd,polybar,picom,rofi,dunst}
-cp /usr/share/doc/bspwm/examples/bspwmrc $HOME/.config/bspwm/
-cp /usr/share/doc/bspwm/examples/sxhkdrc $HOME/.config/sxhkd/
-cp /etc/xdg/picom.conf $HOME/.config/picom/
-cp /etc/polybar/config.ini $HOME/.config/polybar/
-cp /etc/dunst/dunstrc $HOME/.config/dunst/
-chmod +x $HOME/.config/bspwm/bspwmrc
-```
-
-##### Fixing polybar wrong name
-
-The sample config for the polybar has the name `bar/example`, it has to be changed to `bar/top` to be the default one.
 
 ##### Configure HiDPI
 
