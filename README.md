@@ -668,10 +668,10 @@ reboot
 
 ## Install Web Browsers
 
-- Install firefox and google chrome:
+- Install firefox, chromium and google chrome:
 
 ```
-pacman -Sy firefox
+pacman -Sy firefox chromium
 paru google-chrome
 ```
 
