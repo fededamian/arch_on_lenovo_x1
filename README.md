@@ -734,7 +734,7 @@ echo "rofi.dpi: 192">> $HOME/.Xresources
 
 ./rices/marisol/config.ini
 Specify height 30 and the fonts how they are
-
+- Install xautomation to support mouse buttons to keys from sxhkd.
 - Change in ExternalRules the size of the Floating and Updating classes since its too small
 - change weather location in ~/.config/bspwm/src/Weather
 - REmove ctrl tab from sxhdrc
