@@ -4,7 +4,7 @@
 
 ![](img/title.png)
 
-The following steps explain how to install Arch Linux in a brand new computer without deleting the Windows installation or the recovery partitions. The specifications and installation decisions chosen for the installation are listed down below.
+This writeup explains how to install Arch Linux in a brand new Lenovo Thinkpad X1 Carbon Gen 12 computer without deleting the Windows installation or the recovery partitions. The specifications and installation decisions chosen for the installation are listed down below.
 
 ## Computer Specs
 
@@ -23,7 +23,7 @@ The following steps explain how to install Arch Linux in a brand new computer wi
 - Will use an encrypted LUKS partition with a BTRFS filesystem within it with:
   - An encrypted subvolume for the Swap partition
   - An encrypted subvolume for the root partition.
-- I won't create a subvolume for /home since most of my data is stored in a private NAS. Another common option is ext4 but BTRFS Has support for subvolumes, snapshots and other features.
+- I won't create a subvolume for `/home` since most of my data is stored in a private NAS. Another common option is ext4 but BTRFS has support for subvolumes, snapshots and other features.
 - Will use the [rEFInd](https://www.rodsbooks.com/refind/) boot manager. Other options could be GRUB or LILO.
 - Will use the Desktop Environment from the [gh0stzk dotfiles](https://github.com/gh0stzk/dotfiles).
 - The dotfiles are based on bspwm, sxhkd, polybar, rofi, eww, alacritty, kitty, and other tools.
@@ -41,7 +41,7 @@ In Windows, manage the partition with Disk Management (`diskmgmt.msc`)
 
 Reference: https://wiki.archlinux.org/title/Dual_boot_with_Windows
 
-Fast Startup comes by default in Windows 11 and means the shut-down behavior is not shutting down but instead hibernate. Hibernation can corrupt the data if the NTFS disk is mounted from linux while windows was hibernated so the safest choice is to disable it.
+Fast Startup comes by default in Windows 11 and means the shut-down behavior is not shutting down but instead hibernating. Hibernation can corrupt the data if the NTFS disk is mounted from linux while windows was hibernated so the safest choice is to disable it.
 
 - Type:
 ```
@@ -308,7 +308,7 @@ Run the `pacstrap` command that bootstraps Arch into the created filesystem. Bel
 - The rest are useful known utilities.
 
 ```
-pacstrap /mnt base base-devel linux linux-firmware intel-ucode btrfs-progs networkmanager cryptsetup lvm2 vim neovim git man-db man-pages openbsd-netcat
+pacstrap /mnt base base-devel linux linux-firmware intel-ucode btrfs-progs networkmanager cryptsetup lvm2 vim neovim git man-db man-pages openbsd-netcat terminus-font
 ```
 
 This command will take some time.
@@ -342,7 +342,7 @@ You are now in a shell on the new Arch system.
 - Set the time zone:
 
 ```
-ln -sf /usr/share/zoneinfo/America/Buenos_Aires /etc/localtime
+ln -sf /usr/share/zoneinfo/America/Buenos_Aires/etc/localtime
 ```
 
 - Run `hwclock` to generate `/etc/adjtime`:
@@ -370,10 +370,11 @@ locale-gen
 
 #### Configure the Keyboard Layout
 
-Set the console keyboard layout, make the changes persistent in `/etc/vconsole.conf` by adding:
+Set the console keyboard layout and font, make the changes persistent in `/etc/vconsole.conf` by adding:
 
 ```
 KEYMAP=us-acentos
+FONT=term-132b
 ```
 
 #### Configure the Name of the computer
@@ -400,7 +401,7 @@ Add the following lines in `/etc/hosts`:
 
 #### Create a Low Privilege User
 
-- Use the following commands to create a low privilege user account, assign a password to it, and add it to the `wheel` privilege group.
+- Use the following commands to create a low privilege user account (in the example called `lowpriv`), assign a password to it, and add it to the `wheel` privilege group.
 
 ```
 useradd -m lowpriv
@@ -518,6 +519,12 @@ MODULES=(btrfs)
 ```
 HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt lvm2 filesystem fsck)
 ```
+- Edit the FILES directive to include the font:
+
+```
+FILES=(/usr/share/kbd/consolefonts/ter-132b.psf.gz)
+```
+
 - Run the `mkinitcpio` command to create the new initramfs image.
 
 ```
@@ -568,11 +575,21 @@ When rebooting there is a watchdog error. To fix it open `/etc/systemd/system.co
 RebootWatchdogSec=0
 ```
 
+## Install and configure TLP for power management
+
+Reference: https://wiki.archlinux.org/title/TLP
+
+``` 
+sudo pacman -S tlp
+systemctl start tlp
+systemctl enable tlp
+```
+
 ## Enable AUR to get access to more packages
 
 - Reference: https://wiki.archlinux.org/title/Arch_User_Repository
 
-The Arch User Repository (AUR) is a community-driven repository for Arch Linux users. It contains package descriptions (PKGBUILDs) that allow you to compile a package from source with makepkg and then install it via pacman.
+The Arch User Repository (AUR) is a community-driven repository for Arch Linux users. It contains package descriptions (`PKGBUILDs`) that allow you to compile a package from source with makepkg and then install it via pacman.
 
 There are two main tools to use AUR, one is `paru` and the other one is `yay`. We'll use paru:
 
@@ -594,6 +611,7 @@ curl -O https://blackarch.org/strap.sh
 chmod +x ./strap.sh
 sudo su
 ./strap.sh
+rm strap.sh
 ```
 
 Now running `pacman -Sy` should show `blackarch` as on avaliable repository.
@@ -639,22 +657,20 @@ I use this since it is required the LUKS partition password to unlock the comput
 
 ## Setup Bluetooth
 
-The following packages are required.
-
-- Install required packages:
+- Install the required packages and enable the service:
 
 ```
-sudo pacman -S bluez bluez-utils
+sudo pacman -S blueman bluez bluez-libs bluez-utils
 systemctl start bluetooth.service
 systemctl enable bluetooth.service
 ```
 
 ## Setup Video 
 
-This laptop comes with Intel graphics. We install the latest drivers through `mesa`
+This laptop comes with Intel graphics. We install the latest drivers through `mesa` and `vulkan` for OpenGL.
 
 ```
-pacman -S mesa lib32-mesa
+pacman -S mesa lib32-mesa lib32-vulkan-intel vulkan-intel vulkan-tools
 ```
 
 ## Setup Audio
@@ -664,6 +680,35 @@ The following two packages required, and `alsa-utils` is also added in case debu
 ```
 pacman -Sy sof-firmware alsa-ucm-conf alsa-utils
 reboot
+```
+
+## Configure keymap for Xorg
+
+- Create the `/etc/X11/xorg.conf.d/00-keyboard.conf` file and include the following:
+
+```
+Section "InputClass"
+        Identifier "system-keyboard"
+        MatchIsKeyboard "on"
+        Option "XkbLayout" "us"
+        Option "XkbVariant" "intl"
+EndSection
+```
+
+## Change screen brightness
+
+Reference: https://wiki.archlinux.org/title/Backlight
+
+- Check what the max brightness is:
+
+```
+sudo cat /sys/class/backlight/intel_backlight/max_brightness
+```
+
+- Configure the brightness to a certain level (e.g. `300`)
+
+```
+sudo echo 300 > /sys/class/backlight/intel_backlight/brightness
 ```
 
 ## Install Web Browsers
@@ -709,7 +754,7 @@ chmod +x RiceInstaller
 
 The following changes have to be applied after the installation:
 
-### Choose the `emila` theme.
+### Choose the `daniela` theme.
 
 Use `Alt + Space` to choose the `emilia` theme.
 
@@ -730,7 +775,39 @@ echo "Xft.dpi: 192" >> $HOME/.Xresources
 echo "rofi.dpi: 192">> $HOME/.Xresources
 ```
 
-- Configure resizing like https://github.com/ghomasHudson/bspwm-dwm/
+## Theme Customizing
+
+### Windows Resizing
+
+In order to resize windows in a similar way as dwm, create a script at `.config/bspwm/src/` called `bspwm_node_resize` with the following contents:
+
+```
+#!/bin/bash
+# TODO improve documentation and review
+
+# Extracted and adapted from source:
+# https://github.com/Chrysostomus/bspwm-scripts/blob/master/bin/bspwm_resize.sh
+
+# Resizes (expands or contracts) the selected node in the given
+# direction.  This is assigned to a key binding in $HOME/.config/sxhkd/sxhkdrc
+
+size=${2:-'50'}
+direction=$1
+
+# Switch with window in given direction
+case "$direction" in
+    west) bspc node @west -r -"$size" || bspc node @east -r -"$size"
+    ;;
+    east) bspc node @west -r +"$size" || bspc node @east -r +"$size"
+    ;;
+    north) bspc node @south -r -"$size" || bspc node @north -r -"$size"
+    ;;
+    south) bspc node @south -r +"$size" || bspc node @north -r +"$size"
+    ;;
+esac
+```
+
+
 - Definitions for Polybar:
 
 ./rices/marisol/config.ini
@@ -740,6 +817,8 @@ Specify height 30 and the fonts how they are
   - xinput list
     Find the id of the mouse, suppose 15, then
   - xinput set-prop 15 'libinput Accel Speed' 1
+- Change the gtk-3.0 font to Adobe Helvetica editing $HOME/.config/gtk-3.0/settings.ini  to include:
+gtk-font-name=Adobe Helvetica Font 10
 - Change in ExternalRules the size of the Floating and Updating classes since its too small
 - change weather location in ~/.config/bspwm/src/Weather
 - REmove ctrl tab from sxhdrc
@@ -777,63 +856,6 @@ pacman -S jdk-openjdk && pacman -S burpsuite
 java -Dsun.java2d.dpiaware=true -Dsun.java2d.uiScale=2.0 -jar /usr/share/burpsuite/burpsuite.jar
 ```
 
-
-
-- Install BSPWM dependencies
-
-```
-pacman -S libxcb xcb-util xcb-util-wm xcb-util-keysyms
-```
-
-- Install the tools that are going to be used:
-
-```
-pacman -Su bspwm sxhkd polybar picom rofi dunst zathura cava
-```
-
-##### Configure HiDPI
-
-- Create the $HOME/.Xresources file and include the following line:
-
-```
-Xft.dpi: 168
-```
-
-- For polybar, edit the configuration file at `$HOME/.config/polybar/config.ini` to uncomment and set:
-
-```
-dpi = 168
-```
-
-## Configure keymap for Xorg
-
-- Create the `/etc/X11/xorg.conf.d/00-keyboard.conf` file and include the following:
-
-```
-Section "InputClass"
-        Identifier "system-keyboard"
-        MatchIsKeyboard "on"
-        Option "XkbLayout" "us"
-        Option "XkbVariant" "intl"
-EndSection
-```
-
-## Change screen brightness
-
-Reference: https://wiki.archlinux.org/title/Backlight
-
-- Check what the max brightness is:
-
-```
-sudo cat /sys/class/backlight/intel_backlight/max_brightness
-```
-
-- Configure the brightness to a certain level (e.g. `300`)
-
-```
-sudo echo 300 > /sys/class/backlight/intel_backlight/brightness
-```
-
 ## Download and Install Hack Nerd Fonts
 
 ```
@@ -842,69 +864,11 @@ sudo unzip Hack.zip -d /usr/share/fonts/
 sudo rm /usr/share/fonts/{LICENSE,README}.md
 ```
 
-## Install ZSH
-
-```
-sudo pacman -S zsh
-sudo usermod --shell /usr/bin/zsh lowpriv
-```
-
 ## Install bat
 
 ```
 sudo pacman -Syu bat
 ```
-
-## Notes
-
-
-Window Manager: DWM or BSPWM or Awesome or Hyprland that uses Wayland
-Status Bar - polybar
-Launcher: DMenu or Rofi
-zsh
-    - powerlevel10k
-    - zsh-sudo plugin
-VSCode
-Nvim
-Nvimchad
-Terminal Tools: Kitty
-    - fzf
-    - bat
-    - lsd
-    - btop
-- wget
-Status Bars
-
-App Launchers
-
-Wallpapers
-
-Screen Sharing
-
-lf, btop, pulsemixer, cider2 for apple music
-
-Set wallpaper with feh https://wiki.archlinux.org/title/Feh
-
-LARBS - https://larbs.xyz/
-
-App Clients
-
-Color Pickers
-
-Clipboard Managers
-
-Key Bindings
-
-File Managers: Ranger
-
-Music Player: RMPC + MPD + Cava
-
-Other
-
-Systemd startup
-
-https://github.com/reedrw/dotfiles/tree/master
-
 
 ## References:
 
