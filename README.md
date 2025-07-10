@@ -756,7 +756,7 @@ The following changes have to be applied after the installation:
 
 ### Choose the `daniela` theme.
 
-Use `Alt + Space` to choose the `emilia` theme.
+Use `Alt + Space` to choose the `daniela` theme.
 
 ### Configurations for HiDPI
 
