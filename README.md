@@ -775,6 +775,14 @@ echo "Xft.dpi: 192" >> $HOME/.Xresources
 echo "rofi.dpi: 192">> $HOME/.Xresources
 ```
 
+### Support mouse buttons with keys in sxhkd
+
+`sudo pacman -S xautomation`
+
+### Increase mouse sensitivity
+
+- Use `xinput list` to find the id of the mouse, suppose it is `15`, then run `xinput set-prop 15 'libinput Accel Speed' 1`.
+
 ## Theme Customizing
 
 ### Windows Resizing
@@ -807,41 +815,71 @@ case "$direction" in
 esac
 ```
 
+### Rices configurations
 
-- Definitions for Polybar:
+- Marisol Polybar: Edit `./rices/marisol/config.ini` and specify a height of 30.
+- Remove polybar offsets listed as `offset-x` and `offset-y`.
+- Assign polybar `dpi = 192` in the `config.ini`.
+- Fix Size of the Rofi Theme by editing at `~/.config/bspwm/src/rofi-themes/style_1.rasi` and increasing the width to `1200`.
 
-./rices/marisol/config.ini
-Specify height 30 and the fonts how they are
-- Install xautomation to support mouse buttons to keys from sxhkd.
-- Increase mouse sensitivity
-  - xinput list
-    Find the id of the mouse, suppose 15, then
-  - xinput set-prop 15 'libinput Accel Speed' 1
-- Change the gtk-3.0 font to Adobe Helvetica editing $HOME/.config/gtk-3.0/settings.ini  to include:
+### Default Font
+
+- Change the gtk-3.0 font to Adobe Helvetica editing `$HOME/.config/gtk-3.0/settings.ini` to include:
+
+```
 gtk-font-name=Adobe Helvetica Font 10
-- Change in ExternalRules the size of the Floating and Updating classes since its too small
-- change weather location in ~/.config/bspwm/src/Weather
-- REmove ctrl tab from sxhdrc
-- Actually serch for all the rofi usages and add the -dpi 192 command
-- Alt Tab Rofi requires the dpi parameter in sxhkdrc/
-- Fix DPI in the RiceSelector script, which uses ROFI, the same thing as RofiLauncher that comes later
-- remove polybar offsets
-- assign dpi to 192 in polybar xresoureces
-- Fix Rofi Size by editing ~/.config/bspwm/src/config/RofiLauncher and adding `-dpi 192` to the commands using rofi and by editing the styling file at ~/.config/bspwm/src/rofi-themes/style_1.rasi and increasing the width to 1200 
-- Change font size to 11 in rice editor.i
-- Change app launchers to google-chrome-stable --new-window --app=https://www.youtube.com
-- Add 10 workspaces in ~/.config/bspwm/src/MonitorSetup
-- Change the font of JGmenu to 30 pt at ~/config/bspwm/src/config/jgmenurc
-- Disable the ascii art that appears when opening a terminal?
-Open the .zshrc file located in your HOME and delete the last line, which would be this $HOME/.local/bin/colorscript -r
-- Remove the firefox them:e
+```
+### Increase the window size of terminal tools that are too small in HiDPI (updater)
 
-Delete the "Chrome" directory and the file "user.js" located at ~/.mozilla/firefox/####.default-release/
-Where #### are random numbers. Restart firefox and you are done.
-- Remove the -a from the ls alias in .zshrc
-- Remove drawings from the terminal when opening it
-- REmove animations
-- Replace key bindings to larbs
+- Change in `~/.config/bspwm/src/ExternalRules` the size of the Floating and Updating classes since its too small, they are specified in pixels, like `1600x1200`.
+
+### Weather Configuration
+
+- Change weather location in `~/.config/bspwm/src/Weather`
+
+### Key Bindings Configurations
+
+- Remove the `ctrl + tab` key binding from `~/.config/bspwm/src/config/sxhdrc` since it conflicts with the standard switching function in many apps, like browsers.
+
+### Rofi HiDPI configuration
+
+- Search for all the `rofi` command usages in the config files and add the `-dpi 192` argument to the command so that it increases size to a reasonable one in HiDPI.
+
+### Rice Editor
+
+- Triger the Rice Editor with `Super + R`
+- In the Bspwm tab, configure a border width of 4 and a focuse border color of your like.
+- In the Picom tab, specify a corner radius of `15`, remove animations, and fading and all sort of effects.
+- In the Terminal tab, change font size to 11 and transparency to `0.95`.
+
+### Web applications as OS applications launchers
+
+- Create app launchers at `~/.config/bspwm/src/OpenApps` to open Youtube, Gmail, Whatsapp, using `google-chrome-stable --app=https://www.youtube.com` commands.
+
+### Workspaces Configurations
+
+- Create 8 general workspaces and also dedicated workspaces for Gmail, Whatsapp, Telegram, Slack and Youtube at `~/.config/bspwm/src/MonitorSetup` in the `bspc monitor` command:
+
+```
+bspc monitor "$monitor_1" -d 1 2 3 4 5 6 7 8 G W T S Y
+```
+
+### JGMenu fonts
+
+- Change the font of JGmenu to`30` pt at `~/config/bspwm/src/config/jgmenurc`.
+
+### ZSHRC Editions: Terminal ASCII Art and hidden files
+
+- Disable the ascii art that appears when opening a terminal. Open the `~/.zshrc` file and delete the line: `$HOME/.local/bin/colorscript -r`.
+- Remove the -a from the ls alias in `.zshrc` so you don't see hidden by default.
+
+### Remove the Firefox Theme
+
+- Delete the "Chrome" directory and the file "user.js" located at `~/.mozilla/firefox/####.default-release/` where `####` are random numbers. Restart Firefox and you are done.
+
+## Key Bindings
+
+- Replace key bindings to larbs at `~/.config/bspwm/src/config/sxhkdrc`.
 
 ## Install Burp Suite
 
