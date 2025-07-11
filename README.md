@@ -670,7 +670,7 @@ systemctl enable bluetooth.service
 This laptop comes with Intel graphics. We install the latest drivers through `mesa` and `vulkan` for OpenGL.
 
 ```
-pacman -S mesa lib32-mesa lib32-vulkan-intel vulkan-intel vulkan-tools
+pacman -S mesa lib32-mesa lib32-vulkan-intel vulkan-intel vulkan-tools intel-media-driver
 ```
 
 ## Setup Audio
@@ -711,6 +711,13 @@ sudo cat /sys/class/backlight/intel_backlight/max_brightness
 sudo echo 300 > /sys/class/backlight/intel_backlight/brightness
 ```
 
+## Install Fonts
+
+```
+pacman -S gnu-free-fonts noto-fonts noto-fonts-emoji otf-libertinus terminus-font ttf-bitstream-vera ttf-croscore ttf-dejavu ttf-droid ttf-font-awesome ttf-ibm-plex ttf-input ttf-input-nerd ttf-liberation ttf-ms-win11 ttf-roboto 
+paru -S titillium-fonts mac-fonts paru ttf-ms-fonts ttf-ms-win11 ttf-segoe-ui-variable
+```
+
 ## Install Web Browsers
 
 - Install firefox, chromium and google chrome:
@@ -718,6 +725,39 @@ sudo echo 300 > /sys/class/backlight/intel_backlight/brightness
 ```
 pacman -Sy firefox chromium
 paru google-chrome
+```
+
+## Install Keyrings
+
+```
+sudo pacman -S archlinux-keyring chaotic-keyring
+sudo pacman -Syu
+```
+
+## Install Messengers
+
+```
+sudo pacman -S telegram-desktop 
+paru -S zoom slack-desktop
+```
+
+## Install some basic tools
+
+```
+sudo pacman -S bc cifs-utils bind gimp glib2 glxinfo htop btop linux-headers gcc make glibc net-tools npm nvtop openbsd-netcat smbclient 7zip transmission-cli transmission-gtk vlc wmctrl xf86-input-libinput yarn xorg-xrdb patchelf tlp
+```
+
+## Install Docker
+
+```
+sudo pacman -S docker docker-compose
+```
+
+## Install VMWare Workstation
+
+```
+pacman -S uefitool-git
+paru -S vmware-workstation
 ```
 
 ## Install the Tiling Windows Desktop Environmen
