@@ -43,20 +43,20 @@ slack-desktop, Messaging, Slack Desktop (Beta) for Linux, ,
 zoom, Messaging, Video Conferencing and Web Conferencing Service, , aur
 docker, Containers and VMs, Pack ship and run any application as a lightweight container, ,
 docker-compose, Containers and VMs, Fast isolated development environments using Docker, ,
-uefitool-git, Containers and VMs, UEFI firmware image viewer and editor and utilities, ,
+uefitool-git, Containers and VMs, UEFI firmware image viewer and editor and utilities, , aur
 linux-headers, Containers and VMs, Headers and scripts for building modules for the Linux kernel, ,
 vmware-workstation, Containers and VMs, The industry standard for running multiple operating systems as virtual machines on a single Linux PC., , aur
-vmware-keymaps, Containers and VMs, Keymaps required by some VMware packages, ,
+vmware-keymaps, Containers and VMs, Keymaps required by some VMware packages, , aur
 zsh, Shell, A very advanced and programmable command interpreter (shell) for UNIX, ,
 zsh-autosuggestions, Shell, Fish-like autosuggestions for zsh, , 
 zsh-history-substring-search, Shell, ZSH port of Fish history search (up arrow), ,
 zsh-syntax-highlighting, Shell, Fish shell like syntax highlighting for Zsh, ,
 wget, Utilities, Network utility to retrieve files from the web, ,
 curl, Utilities, command line tool and library for transferring data with URLs, ,
-aic94xx-firmware, Utilities, Adaptec SAS 44300 48300 58300 Sequencer Firmware for AIC94xx driver, ,
+aic94xx-firmware, Utilities, Adaptec SAS 44300 48300 58300 Sequencer Firmware for AIC94xx driver, , aur
 bc, Utilities, An arbitrary precision calculator language, ,
 lsd, Utilities, Modern ls with a lot of pretty colors and awesome icons, ,
-flipclock, Utilities, A flip clock screensaver supported by SDL2., ,
+flipclock, Utilities, A flip clock screensaver supported by SDL2., , aur
 fzf, Utilities, Command-line fuzzy finder, ,
 lf, Utilities, A terminal file manager inspired by ranger, ,
 ueberzugpp, Utilities, Command line utility which allows to display images in the terminal, ,
@@ -114,7 +114,7 @@ lazygit, Programming, Simple termial UI for git commands, ,
 burpsuite-pro, Hacking, An integrated platform for performing security testing of web applications (professional edition), , aur
 burpsuite, Hacking, An integrated platform for attacking web applications (community edition) + SHELLING plugin., , 
 jython, Hacking, An implementation of the Python language written in Java, ,
-caido, Hacking, A lightweight web security auditing toolkit., ,
+caido, Hacking, A lightweight web security auditing toolkit., , aur
 nmap, Hacking, Utility for network discovery and security auditing, ,
 xf86-input-libinput, Xorg, Generic input driver for the X.Org server based on libinput, ,
 xorg-xrdb, Xorg, X server resource database utility, ,
